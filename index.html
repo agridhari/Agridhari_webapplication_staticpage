@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AGRIDHARI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+        }
+
+        .container {
+            text-align: center;
+            display: none;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            margin: 25px auto;
+            border: 6px solid #ddd;
+            border-top: 6px solid #3776ab;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #status {
+            color: #555;
+            margin-top: 15px;
+        }
+
+        #countdown {
+            font-size: 22px;
+            font-weight: bold;
+            color: #3776ab;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="loadingScreen">
+
+        <h1>AGRIDHARI</h1>
+
+        <div class="loader"></div>
+
+        <p id="status">
+            Server is starting. Please wait...
+        </p>
+
+        <p>
+            Server will start in approximately
+            <span id="countdown">30</span>
+            seconds
+        </p>
+
+    </div>
+
+
+    <script>
+
+        // Actual Django server on Render
+        const serverURL =
+            "https://vjinnovative-company.onrender.com/";
+
+        // Page to open
+        const finalURL =
+            "https://vjinnovative.co.in";
+
+        let seconds = 30;
+        let countdownTimer;
+
+
+        // Show loader only if server takes more than 2 seconds
+        const loadingDelay = setTimeout(function () {
+
+            document.getElementById("loadingScreen").style.display =
+                "block";
+
+            countdownTimer = setInterval(function () {
+
+                if (seconds > 1) {
+                    seconds--;
+                }
+
+                document.getElementById("countdown").innerText =
+                    seconds;
+
+            }, 1000);
+
+        }, 2000);
+
+
+        // Wake the Django server
+        fetch(serverURL + "?wake=" + Date.now(), {
+            mode: "no-cors",
+            cache: "no-store"
+        })
+        .then(function () {
+
+            // Server is ready
+
+            clearTimeout(loadingDelay);
+            clearInterval(countdownTimer);
+
+            document.getElementById("status").innerText =
+                "Server is ready. Opening AGRIDHARI...";
+
+            window.location.replace(finalURL);
+
+        })
+        .catch(function () {
+
+            document.getElementById("loadingScreen").style.display =
+                "block";
+
+            document.getElementById("status").innerText =
+                "Unable to start server. Please refresh the page.";
+
+        });
+
+    </script>
+
+</body>
+</html>
