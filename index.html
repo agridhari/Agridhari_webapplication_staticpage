@@ -2,37 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>AGRIDHARI</title>
 
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
+        html,
         body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             font-family: Arial, sans-serif;
-            background: #f4f7fb;
+            background: #000;
         }
+
+        /* BACKGROUND VIDEO */
+
+        #backgroundVideo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+
+            width: 100%;
+            height: 100%;
+
+            min-width: 100%;
+            min-height: 100%;
+
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+
+            z-index: 1;
+        }
+
+        /* DARK OVERLAY */
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.45);
+
+            z-index: 2;
+        }
+
+        /* LOADING SCREEN */
 
         .container {
+            position: fixed;
+            inset: 0;
+
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
             text-align: center;
-            display: none;
+            padding: 20px;
+
+            color: white;
+
+            z-index: 999;
         }
 
+        /* TITLE */
+
+        h1 {
+            font-size: 48px;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        /* LOADER */
+
         .loader {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
+
             margin: 25px auto;
-            border: 6px solid #ddd;
-            border-top: 6px solid #3776ab;
+
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid white;
+
             border-radius: 50%;
+
             animation: spin 1s linear infinite;
         }
 
@@ -42,20 +114,106 @@
             }
         }
 
+        /* STATUS */
+
         #status {
-            color: #555;
-            margin-top: 15px;
+            font-size: 19px;
+            margin: 15px 0;
+
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        /* COUNTDOWN */
+
+        .countdownText {
+            font-size: 17px;
+            line-height: 1.8;
+
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
         }
 
         #countdown {
-            font-size: 22px;
+            display: inline-block;
+
+            font-size: 45px;
             font-weight: bold;
-            color: #3776ab;
+
+            color: #ffffff;
+
+            margin: 5px;
+
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 1);
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            .loader {
+                width: 45px;
+                height: 45px;
+                border-width: 5px;
+            }
+
+            #status {
+                font-size: 15px;
+            }
+
+            .countdownText {
+                font-size: 14px;
+            }
+
+            #countdown {
+                font-size: 36px;
+            }
+        }
+
+        /* TABLET */
+
+        @media (min-width: 577px) and (max-width: 991px) {
+            h1 {
+                font-size: 38px;
+            }
+
+            #status {
+                font-size: 17px;
+            }
+
+            #countdown {
+                font-size: 40px;
+            }
         }
     </style>
 </head>
 
 <body>
+
+    <!-- BACKGROUND VIDEO -->
+
+    <video
+        id="backgroundVideo"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+    >
+        <source
+            src="static/videos/loading.mp4"
+            type="video/mp4"
+        >
+    </video>
+
+
+    <!-- DARK OVERLAY -->
+
+    <div class="overlay"></div>
+
+
+    <!-- LOADING SCREEN -->
 
     <div class="container" id="loadingScreen">
 
@@ -67,9 +225,13 @@
             Server is starting. Please wait...
         </p>
 
-        <p>
+        <p class="countdownText">
             Server will start in approximately
+            <br>
+
             <span id="countdown">30</span>
+
+            <br>
             seconds
         </p>
 
@@ -78,65 +240,56 @@
 
     <script>
 
-        // Actual Django server on Render
+        // Django Render URL
+
         const serverURL =
             "https://agridhari-webapplication.onrender.com";
 
-        // Page to open
         const finalURL =
             "https://agridhari-webapplication.onrender.com";
 
+
+        // Countdown starts immediately
+
         let seconds = 30;
-        let countdownTimer;
+
+        const countdown =
+            document.getElementById("countdown");
+
+        const statusText =
+            document.getElementById("status");
 
 
-        // Show loader only if server takes more than 2 seconds
-        const loadingDelay = setTimeout(function () {
+        const countdownTimer = setInterval(function () {
 
-            document.getElementById("loadingScreen").style.display =
-                "block";
+            seconds--;
 
-            countdownTimer = setInterval(function () {
-
-                if (seconds > 1) {
-                    seconds--;
-                }
-
-                document.getElementById("countdown").innerText =
-                    seconds;
-
-            }, 1000);
-
-        }, 2000);
+            countdown.innerText = seconds;
 
 
-        // Wake the Django server
-        fetch(serverURL + "?wake=" + Date.now(), {
-            mode: "no-cors",
-            cache: "no-store"
-        })
-        .then(function () {
+            if (seconds <= 0) {
 
-            // Server is ready
+                clearInterval(countdownTimer);
 
-            clearTimeout(loadingDelay);
-            clearInterval(countdownTimer);
+                statusText.innerText =
+                    "Opening AGRIDHARI...";
 
-            document.getElementById("status").innerText =
-                "Server is ready. Opening AGRIDHARI...";
+                window.location.replace(finalURL);
 
-            window.location.replace(finalURL);
+            }
 
-        })
-        .catch(function () {
+        }, 1000);
 
-            document.getElementById("loadingScreen").style.display =
-                "block";
 
-            document.getElementById("status").innerText =
-                "Unable to start server. Please refresh the page.";
+        // Wake Render server
 
-        });
+        fetch(
+            serverURL + "?wake=" + Date.now(),
+            {
+                mode: "no-cors",
+                cache: "no-store"
+            }
+        );
 
     </script>
 
